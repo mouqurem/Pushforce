@@ -33,6 +33,6 @@ public class DebutRoundActivity extends AppCompatActivity
 
         TextView view_scoreJ4 = findViewById(R.id.score_J4);
         int scoreJ4 = 0;
-        view_scoreJ1.setText("J4 : " + scoreJ4);
+        view_scoreJ4.setText("J4 : " + scoreJ4);
     }
 }
