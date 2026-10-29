@@ -22,5 +22,17 @@ public class DebutRoundActivity extends AppCompatActivity
         TextView view_scoreJ1 = findViewById(R.id.score_J1);
         int scoreJ1 = 0;
         view_scoreJ1.setText("J1 : " + scoreJ1);
+
+        TextView view_scoreJ2 = findViewById(R.id.score_J2);
+        int scoreJ2 = 0;
+        view_scoreJ2.setText("J2 : " + scoreJ2);
+
+        TextView view_scoreJ3 = findViewById(R.id.score_J3);
+        int scoreJ3 = 0;
+        view_scoreJ3.setText("J3 : " + scoreJ3);
+
+        TextView view_scoreJ4 = findViewById(R.id.score_J4);
+        int scoreJ4 = 0;
+        view_scoreJ1.setText("J4 : " + scoreJ4);
     }
 }
