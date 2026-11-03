@@ -79,12 +79,7 @@
             android:layout_marginTop="32dp"
             android:text="Next" />
 
-        <Button
-            android:id="@+id/Bouton_transi"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="32dp"
-            android:text="transi" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -101,6 +96,8 @@
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:text="Choisir une playlist" />
+
+
     </LinearLayout>
 
     <LinearLayout
@@ -150,5 +147,12 @@
             android:layout_height="50dp"
             android:text="Choisir une playlist" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/Bouton_transi"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:text="transi" />
 
 </FrameLayout>

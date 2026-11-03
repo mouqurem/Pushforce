@@ -1,5 +1,6 @@
 package com.example.pushforce;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         Button Bouton_nb_joueur = findViewById(R.id.Bouton_nb_joueur);
         Button Bouton_next = findViewById(R.id.Bouton_next);
         Button Bouton_transi = findViewById(R.id.Bouton_transi);
+        Bouton_transi.setVisibility(View.GONE);
         EditText Input_nb_joueur = findViewById(R.id.Input_nb_joueur);
 
         LinearLayout Page_accueil = findViewById(R.id.Page_accueil);
@@ -51,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
         ActivityResultLauncher<String[]> Selecteur_musique = registerForActivityResult(
                 new ActivityResultContracts.OpenMultipleDocuments(),
                 uris -> {
+
+                    Bouton_transi.setVisibility(View.VISIBLE);
+
                     if (!uris.isEmpty()) {
                         playlist = uris;
                         String nb_musiques_choisies = "Il y a " + uris.size() + " musiques choisies";
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                         Bouton_Layer_2.setText(nb_musiques_choisies);
                         Bouton_Layer_3.setText(nb_musiques_choisies);
                         Bouton_Layer_4.setText(nb_musiques_choisies);
+
                     }
                 });
 
@@ -142,6 +148,9 @@ public class MainActivity extends AppCompatActivity {
         Bouton_transi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, DebutRoundActivity.class);
+                intent.putExtra("nombre_joueurs", Nombre_joueurs);
+                startActivity(intent);
             }
         });
     }
