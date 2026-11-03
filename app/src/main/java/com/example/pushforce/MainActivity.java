@@ -6,6 +6,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import android.net.Uri;
+import java.util.List;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -15,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private String Nom_J2;
     private String Nom_J3;
     private String Nom_J4;
+    private List<Uri> playlist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,24 @@ public class MainActivity extends AppCompatActivity {
         EditText Input_Nom_J2 = findViewById(R.id.Input_Nom_J2);
         EditText Input_Nom_J3 = findViewById(R.id.Input_Nom_J3);
         EditText Input_Nom_J4 = findViewById(R.id.Input_Nom_J4);
+
+        Button Bouton_Layer_1 = findViewById(R.id.Bouton_Layer_1);
+        Button Bouton_Layer_2 = findViewById(R.id.Bouton_Layer_2);
+        Button Bouton_Layer_3 = findViewById(R.id.Bouton_Layer_3);
+        Button Bouton_Layer_4 = findViewById(R.id.Bouton_Layer_4);
+
+        ActivityResultLauncher<String[]> Selecteur_musique = registerForActivityResult(
+                new ActivityResultContracts.OpenMultipleDocuments(),
+                uris -> {
+                    if (!uris.isEmpty()) {
+                        playlist = uris;
+                        String nb_musiques_choisies = "Il y a " + uris.size() + " musiques choisies";
+                        Bouton_Layer_1.setText(nb_musiques_choisies);
+                        Bouton_Layer_2.setText(nb_musiques_choisies);
+                        Bouton_Layer_3.setText(nb_musiques_choisies);
+                        Bouton_Layer_4.setText(nb_musiques_choisies);
+                    }
+                });
 
         Bouton_nb_joueur.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,32 +109,32 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        Button Bouton_Layer_1 = findViewById(R.id.Bouton_Layer_1);
-        Button Bouton_Layer_2 = findViewById(R.id.Bouton_Layer_2);
-        Button Bouton_Layer_3 = findViewById(R.id.Bouton_Layer_3);
-        Button Bouton_Layer_4 = findViewById(R.id.Bouton_Layer_4);
 
         Bouton_Layer_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Selecteur_musique.launch(new String[]{"audio/*"});
             }
         });
 
         Bouton_Layer_2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Selecteur_musique.launch(new String[]{"audio/*"});
             }
         });
 
         Bouton_Layer_3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Selecteur_musique.launch(new String[]{"audio/*"});
             }
         });
 
         Bouton_Layer_4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Selecteur_musique.launch(new String[]{"audio/*"});
             }
         });
     }
