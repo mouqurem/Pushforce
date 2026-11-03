@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button Bouton_nb_joueur = findViewById(R.id.Bouton_nb_joueur);
         Button Bouton_next = findViewById(R.id.Bouton_next);
+        Button Bouton_transi = findViewById(R.id.Bouton_transi);
         EditText Input_nb_joueur = findViewById(R.id.Input_nb_joueur);
 
         LinearLayout Page_accueil = findViewById(R.id.Page_accueil);
@@ -135,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Selecteur_musique.launch(new String[]{"audio/*"});
+            }
+        });
+
+        Bouton_transi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
             }
         });
     }
