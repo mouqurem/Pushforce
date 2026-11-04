@@ -14,12 +14,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 public class DebutRoundActivity extends AppCompatActivity
 {
-
     private int scoreJ1, scoreJ2, scoreJ3, scoreJ4;
 
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
 
-    private Button transiJ1, transiJ2, transiJ3, transiJ4;
+    private Button transiJ1, transiJ2, transiJ3, transiJ4, lancerRound;
 
     private TextView view_scoreJ1, view_scoreJ2, view_scoreJ3, view_scoreJ4;
 
@@ -104,19 +103,31 @@ public class DebutRoundActivity extends AppCompatActivity
 
         //récupérer les boutons stop des joueurs du xml
         transiJ1 = findViewById(R.id.stopJ1);
-        transiJ2 = findViewById(R.id.stopJ1);
-        transiJ3 = findViewById(R.id.stopJ1);
-        transiJ4 = findViewById(R.id.stopJ1);
+        transiJ2 = findViewById(R.id.stopJ2);
+        transiJ3 = findViewById(R.id.stopJ3);
+        transiJ4 = findViewById(R.id.stopJ4);
 
         //mettre les noms des joueurs sur les boutons stop
         transiJ1.setText(nomJ1);
-        transiJ1.setText(nomJ2);
-        transiJ1.setText(nomJ3);
-        transiJ1.setText(nomJ4);
+        transiJ2.setText(nomJ2);
+        transiJ3.setText(nomJ3);
+        transiJ4.setText(nomJ4);
+
+        //Récupérer le bouton lancerRound du XML
+        lancerRound = findViewById(R.id.bouton_lancer_round);
 
 
         maj_scoreboard(nombreJoueurs);
 
+        lancerRound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                lancerRound.setVisibility(View.GONE);
+                layout_scoreboard.setVisibility(View.GONE);
+                layout_quatre_boutons.setVisibility(View.VISIBLE);
+            }
+        });
 
     }
 }
