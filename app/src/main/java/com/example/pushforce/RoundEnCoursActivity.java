@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.os.CountDownTimer;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,7 +19,10 @@ import androidx.core.view.WindowInsetsCompat;
 public class RoundEnCoursActivity extends AppCompatActivity
 {
     private Button transiJ1, transiJ2, transiJ3, transiJ4;
+    private CountDownTimer timer;
+    private TextView chrono;
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
+
 
     public void setup()
     {
@@ -37,6 +42,8 @@ public class RoundEnCoursActivity extends AppCompatActivity
         transiJ2.setText(nomJ2);
         transiJ3.setText(nomJ3);
         transiJ4.setText(nomJ4);
+
+        chrono = findViewById(R.id.chrono);
     }
     public void maj_nb_joueurs(String nb_joueurs)
     {
@@ -81,12 +88,25 @@ public class RoundEnCoursActivity extends AppCompatActivity
         setContentView(R.layout.activity_round_en_cours);
 
         setup();
-
-
         maj_nb_joueurs(nombreJoueurs);
 
 
+        timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
+        {
+            @Override
+            public void onTick(long msRestantes)
+            {
 
+                chrono.setText(String.valueOf(msRestantes/1000));
+            }
+
+            @Override
+            public void onFinish()
+            {
+                chrono.setText("0");
+
+            }
+        }.start();
 
     }
 }
