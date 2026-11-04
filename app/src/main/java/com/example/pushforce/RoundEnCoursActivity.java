@@ -19,7 +19,25 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private Button transiJ1, transiJ2, transiJ3, transiJ4;
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
 
+    public void setup()
+    {
+        Intent intent = getIntent();
+        nomJ1 = intent.getStringExtra("nom_j1");
+        nomJ2 = intent.getStringExtra("nom_j2");
+        nomJ3 = intent.getStringExtra("nom_j3");
+        nomJ4 = intent.getStringExtra("nom_j4");
+        nombreJoueurs = intent.getStringExtra("nb_joueurs");
 
+        transiJ1 = findViewById(R.id.transiJ1);
+        transiJ2 = findViewById(R.id.transiJ2);
+        transiJ3 = findViewById(R.id.transiJ3);
+        transiJ4 = findViewById(R.id.transiJ4);
+
+        transiJ1.setText(nomJ1);
+        transiJ2.setText(nomJ2);
+        transiJ3.setText(nomJ3);
+        transiJ4.setText(nomJ4);
+    }
     public void maj_nb_joueurs(String nb_joueurs)
     {
 
@@ -62,22 +80,8 @@ public class RoundEnCoursActivity extends AppCompatActivity
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_round_en_cours);
 
-        Intent intent = getIntent();
-        nomJ1 = intent.getStringExtra("nom_j1");
-        nomJ2 = intent.getStringExtra("nom_j2");
-        nomJ3 = intent.getStringExtra("nom_j3");
-        nomJ4 = intent.getStringExtra("nom_j4");
-        nombreJoueurs = intent.getStringExtra("nb_joueurs");
+        setup();
 
-        transiJ1 = findViewById(R.id.transiJ1);
-        transiJ2 = findViewById(R.id.transiJ2);
-        transiJ3 = findViewById(R.id.transiJ3);
-        transiJ4 = findViewById(R.id.transiJ4);
-
-        transiJ1.setText(nomJ1);
-        transiJ2.setText(nomJ2);
-        transiJ3.setText(nomJ3);
-        transiJ4.setText(nomJ4);
 
         maj_nb_joueurs(nombreJoueurs);
 

@@ -24,9 +24,33 @@ public class DebutRoundActivity extends AppCompatActivity
 
     private TextView view_scoreJ1, view_scoreJ2, view_scoreJ3, view_scoreJ4;
 
-    private ConstraintLayout layout_scoreboard;
+    public void setup()
+    {
+        //à remplacer par intent
+        scoreJ1 = 0;
+        scoreJ2 = 0;
+        scoreJ3 = 0;
+        scoreJ4 = 0;
+
+        //à remplacer par intent
+        nombreJoueurs = "4";
 
 
+        //à remplacer par intent
+        nomJ1 = "Rémi";
+        nomJ2 = "Doriann";
+        nomJ3 = "Houcine";
+        nomJ4 = "Rafaël";
+
+        // Récupérer les TextView du scoreboard du xml
+        view_scoreJ1 = findViewById(R.id.score_J1);
+        view_scoreJ2 = findViewById(R.id.score_J2);
+        view_scoreJ3 = findViewById(R.id.score_J3);
+        view_scoreJ4 = findViewById(R.id.score_J4);
+
+        //Récupérer le bouton lancerRound du XML
+        lancerRound = findViewById(R.id.bouton_lancer_round);
+    }
     public void maj_scoreboard()
     {
         view_scoreJ1.setText(nomJ1 + " = " + scoreJ1);
@@ -78,37 +102,7 @@ public class DebutRoundActivity extends AppCompatActivity
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_debut_round);
 
-        //à remplacer par intent
-        scoreJ1 = 0;
-        scoreJ2 = 0;
-        scoreJ3 = 0;
-        scoreJ4 = 0;
-
-        //à remplacer par intent
-        nombreJoueurs = "4";
-
-
-        //à remplacer par intent
-        nomJ1 = "Rémi";
-        nomJ2 = "Doriann";
-        nomJ3 = "Houcine";
-        nomJ4 = "Rafaël";
-
-
-        // Récupérer les Layout du xml
-        layout_scoreboard = findViewById(R.id.scoreboard);
-
-        // Récupérer les TextView du scoreboard du xml
-        view_scoreJ1 = findViewById(R.id.score_J1);
-        view_scoreJ2 = findViewById(R.id.score_J2);
-        view_scoreJ3 = findViewById(R.id.score_J3);
-        view_scoreJ4 = findViewById(R.id.score_J4);
-
-        //Récupérer le bouton lancerRound du XML
-        lancerRound = findViewById(R.id.bouton_lancer_round);
-
-
-        layout_scoreboard.setVisibility(View.VISIBLE);
+        setup();
 
         maj_scoreboard();
 
