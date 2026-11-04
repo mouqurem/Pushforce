@@ -1,8 +1,10 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -119,7 +121,13 @@ public class DebutRoundActivity extends AppCompatActivity
                 //INTENT ROUND EN COURS
                 //nb joueurs
                 //noms des joueurs
-
+                Intent intent = new Intent(DebutRoundActivity.this, RoundEnCoursActivity.class);
+                intent.putExtra("nom_j1", nomJ1);
+                intent.putExtra("nom_j1", nomJ2);
+                intent.putExtra("nom_j1", nomJ3);
+                intent.putExtra("nom_j1", nomJ4);
+                intent.putExtra("nb_joueurs", nombreJoueurs);
+                startActivity(intent);
             }
         });
 
