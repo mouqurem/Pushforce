@@ -26,6 +26,11 @@
         <activity
             android:name=".DebutRoundActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".RoundEnCoursActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

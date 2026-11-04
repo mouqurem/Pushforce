@@ -123,9 +123,9 @@ public class DebutRoundActivity extends AppCompatActivity
                 //noms des joueurs
                 Intent intent = new Intent(DebutRoundActivity.this, RoundEnCoursActivity.class);
                 intent.putExtra("nom_j1", nomJ1);
-                intent.putExtra("nom_j1", nomJ2);
-                intent.putExtra("nom_j1", nomJ3);
-                intent.putExtra("nom_j1", nomJ4);
+                intent.putExtra("nom_j2", nomJ2);
+                intent.putExtra("nom_j3", nomJ3);
+                intent.putExtra("nom_j4", nomJ4);
                 intent.putExtra("nb_joueurs", nombreJoueurs);
                 startActivity(intent);
             }

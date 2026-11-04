@@ -24,22 +24,29 @@ public class RoundEnCoursActivity extends AppCompatActivity
     {
 
         //Mettre à jour visibilité en fonction du nombre de joueurs
-        if (nb_joueurs.equals("1")) {
+        if (nb_joueurs.equals("1"))
+        {
             transiJ1.setVisibility(View.VISIBLE);
             transiJ2.setVisibility(View.GONE);
             transiJ3.setVisibility(View.GONE);
             transiJ4.setVisibility(View.GONE);
-        } else if (nb_joueurs.equals("2")) {
+        }
+        else if (nb_joueurs.equals("2"))
+        {
             transiJ1.setVisibility(View.VISIBLE);
             transiJ2.setVisibility(View.VISIBLE);
             transiJ3.setVisibility(View.GONE);
             transiJ4.setVisibility(View.GONE);
-        } else if (nb_joueurs.equals("3")) {
+        }
+        else if (nb_joueurs.equals("3"))
+        {
             transiJ1.setVisibility(View.VISIBLE);
             transiJ2.setVisibility(View.VISIBLE);
             transiJ3.setVisibility(View.VISIBLE);
             transiJ4.setVisibility(View.GONE);
-        } else if (nb_joueurs.equals("4")) {
+        }
+        else if (nb_joueurs.equals("4"))
+        {
             transiJ1.setVisibility(View.VISIBLE);
             transiJ2.setVisibility(View.VISIBLE);
             transiJ3.setVisibility(View.VISIBLE);
@@ -72,7 +79,7 @@ public class RoundEnCoursActivity extends AppCompatActivity
         transiJ3.setText(nomJ3);
         transiJ4.setText(nomJ4);
 
-
+        maj_nb_joueurs(nombreJoueurs);
 
 
 
