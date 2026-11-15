@@ -25,6 +25,15 @@
             android:name=".EcouteActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".DebutRoundActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".RoundEnCoursActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
