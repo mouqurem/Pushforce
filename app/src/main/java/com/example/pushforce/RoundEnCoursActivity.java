@@ -1,6 +1,7 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.CountDownTimer;
+import android.media.MediaPlayer;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +19,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.IOException;
+
 public class RoundEnCoursActivity extends AppCompatActivity
 {
     private Button transiJ1, transiJ2, transiJ3, transiJ4;
@@ -24,10 +28,12 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private TextView chrono;
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
     private Uri lien_son;
+    private MediaPlayer mediaPlayer = new MediaPlayer();
 
 
     public void setup()
     {
+
         Intent intent = getIntent();
         nomJ1 = intent.getStringExtra("nom_j1");
         nomJ2 = intent.getStringExtra("nom_j2");
@@ -82,6 +88,32 @@ public class RoundEnCoursActivity extends AppCompatActivity
         }
     }
 
+public void setup_media()
+{
+//https://developer.android.com/media/platform/mediaplayer/basics?hl=fr
+// Attention : Vous devez intercepter ou transmettre IllegalArgumentException et IOException lorsque vous utilisez setDataSource(),
+// car le fichier auquel vous faites référence peut ne pas exister.
+
+// On met donc des try catch
+
+    mediaPlayer.setAudioAttributes(
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+    );
+    try {
+        mediaPlayer.setDataSource(getApplicationContext(), lien_son);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+    try {
+        mediaPlayer.prepare();
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -93,6 +125,8 @@ public class RoundEnCoursActivity extends AppCompatActivity
         setup();
         maj_nb_joueurs(nombreJoueurs);
 
+        setup_media();
+        mediaPlayer.start();
 
         timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
         {
@@ -104,10 +138,10 @@ public class RoundEnCoursActivity extends AppCompatActivity
             }
 
             @Override
-            public void onFinish()
+            public void onFinish() //Chrono écoulé
             {
                 chrono.setText("0");
-
+                mediaPlayer.stop(); //Arrêter la musique
             }
         }.start();
 

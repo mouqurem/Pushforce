@@ -115,8 +115,6 @@ public class DebutRoundActivity extends AppCompatActivity
 
         //Ajouter flag pour ne pas choisir musique déjà choisie
 
-        view_scoreJ1.setText(String.valueOf(indice_son)); // printf(indice_son)
-
         return playlist.get(indice_son);
     }
 
