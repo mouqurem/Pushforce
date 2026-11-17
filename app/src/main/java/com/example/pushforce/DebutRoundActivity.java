@@ -13,6 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 public class DebutRoundActivity extends AppCompatActivity
 {
     private int scoreJ1, scoreJ2, scoreJ3, scoreJ4;
@@ -21,7 +25,10 @@ public class DebutRoundActivity extends AppCompatActivity
 
     private Button lancerRound;
 
+    private ArrayList<String> playlist;
+
     private TextView view_scoreJ1, view_scoreJ2, view_scoreJ3, view_scoreJ4;
+
 
     public void setup()
     {
@@ -31,16 +38,19 @@ public class DebutRoundActivity extends AppCompatActivity
         scoreJ3 = 0;
         scoreJ4 = 0;
 
-        //Récupérer le nombre de joueurs
+        //Récupérer le nombre de joueurs par intent
         nombreJoueurs = getIntent().getStringExtra("nombre_joueurs");
 
-        //Récupérer les noms des joueurs
+        //Récupérer les noms des joueurs par intent
         nomJ1 = getIntent().getStringExtra("nom_J1");
         nomJ2 = getIntent().getStringExtra("nom_J2");
         nomJ3 = getIntent().getStringExtra("nom_J3");
         nomJ4 = getIntent().getStringExtra("nom_J4");
 
-        // Récupérer les TextView du scoreboard du xml
+        //Récupérer la playlist par intent
+        playlist = getIntent().getStringArrayListExtra("playlist");
+
+                // Récupérer les TextView du scoreboard du xml
         view_scoreJ1 = findViewById(R.id.score_J1);
         view_scoreJ2 = findViewById(R.id.score_J2);
         view_scoreJ3 = findViewById(R.id.score_J3);
@@ -92,6 +102,18 @@ public class DebutRoundActivity extends AppCompatActivity
         }
     }
 
+    public String choisir_musique_random() //Retourne le lien interne de la playlist
+    {
+        int indice_son = (int)Math.random()*playlist.size();
+        //double aléatoire entre 0 et la taille max de la playlist casté en int
+
+        //Ajouter flag pour ne pas choisir musique déjà choisie
+
+        view_scoreJ1.setText(indice_son); // printf(indice_son)
+
+        return playlist.get(indice_son);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -106,13 +128,13 @@ public class DebutRoundActivity extends AppCompatActivity
 
         maj_nb_joueurs(nombreJoueurs);
 
+        String lien_son = choisir_musique_random();
+        view_scoreJ2.setText(nomJ2 + " = " + lien_son); // printf(indice_son)
+
         lancerRound.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
-                //INTENT ROUND EN COURS
-                //nb joueurs
-                //noms des joueurs
                 Intent intent = new Intent(DebutRoundActivity.this, RoundEnCoursActivity.class);
                 intent.putExtra("nom_j1", nomJ1);
                 intent.putExtra("nom_j2", nomJ2);

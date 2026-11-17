@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import android.net.Uri;
+
+import java.util.ArrayList;
 import java.util.List;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -65,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
                         Bouton_Layer_4.setText(nb_musiques_choisies);
 
                     }
+
                 });
+        ArrayList<String> playlist = new ArrayList<>(); //Transforme playlist en arraylist
 
         Bouton_nb_joueur.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("nom_J2", Nom_J2);
                 intent.putExtra("nom_J3", Nom_J3);
                 intent.putExtra("nom_J4", Nom_J4);
+                intent.putStringArrayListExtra("playlist", playlist);
 
                 startActivity(intent);
             }
