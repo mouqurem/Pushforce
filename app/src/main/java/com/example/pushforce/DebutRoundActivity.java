@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import android.net.Uri;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -25,10 +27,13 @@ public class DebutRoundActivity extends AppCompatActivity
 
     private Button lancerRound;
 
-    private ArrayList<String> playlist;
+    private Uri lien_son;
+
+    private ArrayList<Uri> playlist;
 
     private TextView view_scoreJ1, view_scoreJ2, view_scoreJ3, view_scoreJ4;
 
+    private Random random = new Random();
 
     public void setup()
     {
@@ -48,7 +53,7 @@ public class DebutRoundActivity extends AppCompatActivity
         nomJ4 = getIntent().getStringExtra("nom_J4");
 
         //Récupérer la playlist par intent
-        playlist = getIntent().getStringArrayListExtra("playlist");
+        playlist = getIntent().getParcelableArrayListExtra("playlist");
 
                 // Récupérer les TextView du scoreboard du xml
         view_scoreJ1 = findViewById(R.id.score_J1);
@@ -102,14 +107,15 @@ public class DebutRoundActivity extends AppCompatActivity
         }
     }
 
-    public String choisir_musique_random() //Retourne le lien interne de la playlist
+    public Uri choisir_musique_random() //Retourne le lien interne de la playlist
     {
-        int indice_son = (int)Math.random()*playlist.size();
-        //double aléatoire entre 0 et la taille max de la playlist casté en int
+
+        int indice_son = random.nextInt(playlist.size());
+        //Int aléatoire parmi la taille de la playlist
 
         //Ajouter flag pour ne pas choisir musique déjà choisie
 
-        view_scoreJ1.setText(indice_son); // printf(indice_son)
+        view_scoreJ1.setText(String.valueOf(indice_son)); // printf(indice_son)
 
         return playlist.get(indice_son);
     }
@@ -128,8 +134,8 @@ public class DebutRoundActivity extends AppCompatActivity
 
         maj_nb_joueurs(nombreJoueurs);
 
-        String lien_son = choisir_musique_random();
-        view_scoreJ2.setText(nomJ2 + " = " + lien_son); // printf(indice_son)
+        lien_son = choisir_musique_random();
+
 
         lancerRound.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +147,8 @@ public class DebutRoundActivity extends AppCompatActivity
                 intent.putExtra("nom_j3", nomJ3);
                 intent.putExtra("nom_j4", nomJ4);
                 intent.putExtra("nb_joueurs", nombreJoueurs);
+                intent.putExtra("lien_son", lien_son);
+
                 startActivity(intent);
             }
         });

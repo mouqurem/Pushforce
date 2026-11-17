@@ -1,6 +1,7 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +23,7 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private CountDownTimer timer;
     private TextView chrono;
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
+    private Uri lien_son;
 
 
     public void setup()
@@ -32,6 +34,7 @@ public class RoundEnCoursActivity extends AppCompatActivity
         nomJ3 = intent.getStringExtra("nom_j3");
         nomJ4 = intent.getStringExtra("nom_j4");
         nombreJoueurs = intent.getStringExtra("nb_joueurs");
+        lien_son = getIntent().getParcelableExtra("lien_son");
 
         transiJ1 = findViewById(R.id.transiJ1);
         transiJ2 = findViewById(R.id.transiJ2);

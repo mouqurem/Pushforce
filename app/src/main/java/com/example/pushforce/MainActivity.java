@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private String Nom_J2;
     private String Nom_J3;
     private String Nom_J4;
-    private List<Uri> playlist;
+    private ArrayList<Uri> playlist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     Bouton_transi.setVisibility(View.VISIBLE);
 
                     if (!uris.isEmpty()) {
-                        playlist = uris;
+                        playlist = new ArrayList<>(uris);
                         String nb_musiques_choisies = "Il y a " + uris.size() + " musiques choisies";
                         Bouton_Layer_1.setText(nb_musiques_choisies);
                         Bouton_Layer_2.setText(nb_musiques_choisies);
@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 });
-        ArrayList<String> playlist = new ArrayList<>(); //Transforme playlist en arraylist
 
         Bouton_nb_joueur.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("nom_J2", Nom_J2);
                 intent.putExtra("nom_J3", Nom_J3);
                 intent.putExtra("nom_J4", Nom_J4);
-                intent.putStringArrayListExtra("playlist", playlist);
+                intent.putParcelableArrayListExtra("playlist", playlist);
 
                 startActivity(intent);
             }
