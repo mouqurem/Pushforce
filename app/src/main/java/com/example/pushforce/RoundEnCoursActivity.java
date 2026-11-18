@@ -1,12 +1,10 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.database.Cursor;
 import android.media.AudioAttributes;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -177,9 +175,14 @@ public void setup_media()
             @Override
             public void onFinish() //Chrono écoulé
             {
-                chrono.setText("0");
                 mediaPlayer.stop(); //Arrêter la musique
 
+                Intent intent = new Intent(RoundEnCoursActivity.this, AfficherReponseActivity.class);
+                intent.putExtra("titre", titre);
+                intent.putExtra("artiste", artiste);
+
+
+                startActivity(intent);
 
             }
         }.start();
