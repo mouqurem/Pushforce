@@ -13,6 +13,8 @@ import android.os.CountDownTimer;
 import android.media.MediaPlayer;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
@@ -20,6 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class RoundEnCoursActivity extends AppCompatActivity
 {
@@ -29,19 +32,18 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
     private Uri lien_son;
     private MediaPlayer mediaPlayer = new MediaPlayer();
+    private ArrayList<Uri> playlist;
 
 
     public void setup()
     {
+        nomJ1 = "Remi";
+        nomJ2 = "Doriann";
+        nomJ3 = "Rafael";
+        nomJ4 = "Houcine";
+        nombreJoueurs = "4";
 
-        Intent intent = getIntent();
-        nomJ1 = intent.getStringExtra("nom_j1");
-        nomJ2 = intent.getStringExtra("nom_j2");
-        nomJ3 = intent.getStringExtra("nom_j3");
-        nomJ4 = intent.getStringExtra("nom_j4");
-        nombreJoueurs = intent.getStringExtra("nb_joueurs");
-        lien_son = getIntent().getParcelableExtra("lien_son");
-
+        //lien_son =
         transiJ1 = findViewById(R.id.transiJ1);
         transiJ2 = findViewById(R.id.transiJ2);
         transiJ3 = findViewById(R.id.transiJ3);
@@ -122,11 +124,28 @@ public void setup_media()
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_round_en_cours);
 
+
+
         setup();
         maj_nb_joueurs(nombreJoueurs);
 
-        setup_media();
-        mediaPlayer.start();
+
+        ActivityResultLauncher<String[]> Selecteur_musique = registerForActivityResult(
+                new ActivityResultContracts.OpenMultipleDocuments(),
+                uris -> {
+
+                    if (!uris.isEmpty()) {
+                        playlist = new ArrayList<>(uris);
+                    }
+                    lien_son = playlist.get(0);
+                    setup_media();
+                    mediaPlayer.start();
+                });
+        Selecteur_musique.launch(new String[]{"audio/*"});
+
+
+
+
 
         timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
         {

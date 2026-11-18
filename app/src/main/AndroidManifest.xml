@@ -25,11 +25,11 @@
 
         <activity
             android:name=".DebutRoundActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <activity
             android:name=".RoundEnCoursActivity"
-            android:exported="false" />
+            android:exported="true" />
 
     </application>
 
