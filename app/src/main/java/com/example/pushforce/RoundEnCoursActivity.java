@@ -1,9 +1,12 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.AudioAttributes;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,7 +32,7 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private Button transiJ1, transiJ2, transiJ3, transiJ4;
     private CountDownTimer timer;
     private TextView chrono;
-    private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
+    private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs, titre, artiste;
     private Uri lien_son;
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private ArrayList<Uri> playlist;
@@ -116,7 +119,17 @@ public void setup_media()
     }
 }
 
+    private void lire_metadonnees(Uri uri)
+    {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(getApplicationContext(), uri);
 
+        titre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        artiste = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+
+        transiJ1.setText(titre);
+        transiJ2.setText(artiste);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -130,6 +143,9 @@ public void setup_media()
         maj_nb_joueurs(nombreJoueurs);
 
 
+        //https://stackoverflow.com/questions/11705692/android-how-to-get-a-single-songs-id-info-from-a-know-uri?rq=3
+        //Assigner le titre et l'artiste en fonction du lien URI
+        //Peu importe le son, on veut juste simuler la sélection
         ActivityResultLauncher<String[]> Selecteur_musique = registerForActivityResult(
                 new ActivityResultContracts.OpenMultipleDocuments(),
                 uris -> {
@@ -138,12 +154,14 @@ public void setup_media()
                         playlist = new ArrayList<>(uris);
                     }
                     lien_son = playlist.get(0);
+
+                    lire_metadonnees(lien_son);
+
+
                     setup_media();
                     mediaPlayer.start();
                 });
         Selecteur_musique.launch(new String[]{"audio/*"});
-
-
 
 
 
@@ -161,6 +179,8 @@ public void setup_media()
             {
                 chrono.setText("0");
                 mediaPlayer.stop(); //Arrêter la musique
+
+
             }
         }.start();
 
