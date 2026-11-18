@@ -1,6 +1,7 @@
 package com.example.pushforce;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.widget.TextView;
@@ -8,16 +9,19 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+
 public class AfficherReponseActivity extends AppCompatActivity
 {
     private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs, titre, artiste;
     private TextView view_titre, view_artiste;
     private CountDownTimer timer;
+    private ArrayList<Uri> playlist;
 
     void setup()
     {
         //Récupérer le nombre de joueurs par intent
-        nombreJoueurs = getIntent().getStringExtra("nombre_joueurs");
+        nombreJoueurs = getIntent().getStringExtra("nb_joueurs");
 
         //Récupérer les noms des joueurs par intent
         nomJ1 = getIntent().getStringExtra("nom_J1");
@@ -26,6 +30,7 @@ public class AfficherReponseActivity extends AppCompatActivity
         nomJ4 = getIntent().getStringExtra("nom_J4");
         titre = getIntent().getStringExtra("titre");
         artiste = getIntent().getStringExtra("artiste");
+        playlist = getIntent().getParcelableArrayListExtra("playlist");
 
         //Récupérer les textview du XML
         view_titre = findViewById(R.id.titre);
@@ -59,10 +64,11 @@ public class AfficherReponseActivity extends AppCompatActivity
             public void onFinish() //Quand le timer est écoulé, on repart sur un début de round
             {
                 Intent intent = new Intent(AfficherReponseActivity.this, DebutRoundActivity.class);
-                intent.putExtra("nom_j1", nomJ1);
-                intent.putExtra("nom_j2", nomJ2);
-                intent.putExtra("nom_j3", nomJ3);
-                intent.putExtra("nom_j4", nomJ4);
+                intent.putExtra("nom_J1", nomJ1);
+                intent.putExtra("nom_J2", nomJ2);
+                intent.putExtra("nom_J3", nomJ3);
+                intent.putExtra("nom_J4", nomJ4);
+                intent.putParcelableArrayListExtra("playlist", playlist);
                 intent.putExtra("nb_joueurs", nombreJoueurs);
 
                 startActivity(intent);

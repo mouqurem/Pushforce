@@ -38,13 +38,15 @@ public class RoundEnCoursActivity extends AppCompatActivity
 
     public void setup()
     {
-        nomJ1 = "Remi";
-        nomJ2 = "Doriann";
-        nomJ3 = "Rafael";
-        nomJ4 = "Houcine";
-        nombreJoueurs = "4";
+        nomJ1 = getIntent().getStringExtra("nom_J1");
+        nomJ2 = getIntent().getStringExtra("nom_J2");
+        nomJ3 = getIntent().getStringExtra("nom_J3");
+        nomJ4 = getIntent().getStringExtra("nom_J4");
+        nombreJoueurs = getIntent().getStringExtra("nb_joueurs");
+        playlist = getIntent().getParcelableArrayListExtra("playlist");
 
-        //lien_son =
+        lien_son = getIntent().getParcelableExtra("lien_son");
+
         transiJ1 = findViewById(R.id.transiJ1);
         transiJ2 = findViewById(R.id.transiJ2);
         transiJ3 = findViewById(R.id.transiJ3);
@@ -122,11 +124,9 @@ public void setup_media()
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(getApplicationContext(), uri);
 
+        //Assigner le titre et l'artiste en fonction du lien URI
         titre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         artiste = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-
-        transiJ1.setText(titre);
-        transiJ2.setText(artiste);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -135,32 +135,14 @@ public void setup_media()
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_round_en_cours);
 
-
-
         setup();
+
         maj_nb_joueurs(nombreJoueurs);
 
+        lire_metadonnees(lien_son);
 
-        //https://stackoverflow.com/questions/11705692/android-how-to-get-a-single-songs-id-info-from-a-know-uri?rq=3
-        //Assigner le titre et l'artiste en fonction du lien URI
-        //Peu importe le son, on veut juste simuler la sélection
-        ActivityResultLauncher<String[]> Selecteur_musique = registerForActivityResult(
-                new ActivityResultContracts.OpenMultipleDocuments(),
-                uris -> {
-
-                    if (!uris.isEmpty()) {
-                        playlist = new ArrayList<>(uris);
-                    }
-                    lien_son = playlist.get(0);
-
-                    lire_metadonnees(lien_son);
-
-
-                    setup_media();
-                    mediaPlayer.start();
-                });
-        Selecteur_musique.launch(new String[]{"audio/*"});
-
+        setup_media();
+        mediaPlayer.start();
 
 
         timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
@@ -180,6 +162,12 @@ public void setup_media()
                 Intent intent = new Intent(RoundEnCoursActivity.this, AfficherReponseActivity.class);
                 intent.putExtra("titre", titre);
                 intent.putExtra("artiste", artiste);
+                intent.putExtra("nom_J1", nomJ1);
+                intent.putExtra("nom_J2", nomJ2);
+                intent.putExtra("nom_J3", nomJ3);
+                intent.putExtra("nom_J4", nomJ4);
+                intent.putExtra("nb_joueurs", nombreJoueurs);
+                intent.putParcelableArrayListExtra("playlist", playlist);
 
 
                 startActivity(intent);

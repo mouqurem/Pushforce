@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, DebutRoundActivity.class);
-                intent.putExtra("nombre_joueurs", Nombre_joueurs);
+                intent.putExtra("nb_joueurs", Nombre_joueurs);
                 intent.putExtra("nom_J1", Nom_J1);
                 intent.putExtra("nom_J2", Nom_J2);
                 intent.putExtra("nom_J3", Nom_J3);

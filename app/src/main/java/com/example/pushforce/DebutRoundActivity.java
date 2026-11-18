@@ -44,7 +44,7 @@ public class DebutRoundActivity extends AppCompatActivity
         scoreJ4 = 0;
 
         //Récupérer le nombre de joueurs par intent
-        nombreJoueurs = getIntent().getStringExtra("nombre_joueurs");
+        nombreJoueurs = getIntent().getStringExtra("nb_joueurs");
 
         //Récupérer les noms des joueurs par intent
         nomJ1 = getIntent().getStringExtra("nom_J1");
@@ -140,11 +140,12 @@ public class DebutRoundActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 Intent intent = new Intent(DebutRoundActivity.this, RoundEnCoursActivity.class);
-                intent.putExtra("nom_j1", nomJ1);
-                intent.putExtra("nom_j2", nomJ2);
-                intent.putExtra("nom_j3", nomJ3);
-                intent.putExtra("nom_j4", nomJ4);
+                intent.putExtra("nom_J1", nomJ1);
+                intent.putExtra("nom_J2", nomJ2);
+                intent.putExtra("nom_J3", nomJ3);
+                intent.putExtra("nom_J4", nomJ4);
                 intent.putExtra("nb_joueurs", nombreJoueurs);
+                intent.putParcelableArrayListExtra("playlist", playlist);
                 intent.putExtra("lien_son", lien_son);
 
                 startActivity(intent);
