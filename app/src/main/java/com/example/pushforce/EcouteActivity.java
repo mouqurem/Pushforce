@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.TextView;
+import android.Manifest;
+import android.content.pm.PackageManager;
 
 //import pour l'affichage bibliothèque hors android
 import androidx.activity.EdgeToEdge;
@@ -12,16 +14,33 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 
 public class EcouteActivity extends AppCompatActivity {
     //Déclaration
     //Constantes final
-    private static final String TAG = "VOC";
+    private static final String TAG = "LOG";
     private static final int DUREE_MAXIMUM_ECOUTE = 5000; // en ms
 
     //Attributs
     private TextView textCompteur;
     private CountDownTimer compteur;
+    private TextView textEcoute;
+
+    // Demander une permission au téléphone et à l'utilisateur, et ce qu'on fait avec la réponse
+    private final ActivityResultLauncher<String> demandePermissionMicro =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), accorde ->{ // demandé à l'utilisateur le micro
+                if (accorde) {
+                    Log.d(TAG, "permission micro accordee"); // message d'info'
+                    demarrerEcoute();
+                }
+                else {
+                    Log.d(TAG, "permission micro echoueyy");
+                    textEcoute.setText("ECHOUEYYY MICRO REFUSEYYYY");
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) { //Première étape quand l'écran est lancé, bien initialisé l'écran
@@ -37,6 +56,26 @@ public class EcouteActivity extends AppCompatActivity {
 
         // LE lien entre le Java et le XML qui compte
         textCompteur = findViewById(R.id.textCompteur);
+        textEcoute = findViewById(R.id.textEcoute);
+
+        //lancer le programme
+        verifierPermissionMicro();
+    }
+
+    //Fonction dont le nom est parlant
+    private void verifierPermissionMicro() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED) {   //ligne bien complexe pour dire est ce que "si la permission est accordée"
+            //cas accordée
+            demarrerEcoute();
+            } else {
+            //cas pas accordée
+            demandePermissionMicro.launch(Manifest.permission.RECORD_AUDIO);
+        }
+    }
+
+    //On démarre le compteur après l'écoute on est fair play
+    private void demarrerEcoute() {
         demarrerCompteur();
     }
     //Fonction du compteur
