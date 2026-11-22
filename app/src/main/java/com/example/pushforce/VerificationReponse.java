@@ -11,8 +11,8 @@ public class VerificationReponse {
 
     // Constructeur : on crée un vérificateur pour une seule chanson
     public VerificationReponse(String artisteAttendu, String titreAttendu) {
-        this.artisteAttendu = artisteAttendu;
-        this.titreAttendu = titreAttendu;
+        this.artisteAttendu = nettoyer(artisteAttendu);
+        this.titreAttendu = nettoyer(titreAttendu);
     }
 
 
@@ -54,6 +54,9 @@ public class VerificationReponse {
 
     // Vérifer si tout ce qui est attendu est là ( à peu près )
     private boolean estDansPhrase(String attendu, String phrase) {
+        if (normaliser(attendu).isEmpty()) {
+            return false;          // rien à chercher : impossible de trouver
+        }
         String[] motsAttendus = normaliser(attendu).split(" ");
         String[] motsDits = normaliser(phrase).split(" ");
 
@@ -81,6 +84,17 @@ public class VerificationReponse {
         if (mot.length() <= 5) return 1;
         if (mot.length() <= 9) return 2;
         return 3;
+    }
+
+    // "Alors on danse (Radio Edit)" → "Alors on danse"   |   "Stromae feat. X" → "Stromae"
+    private static String nettoyer(String texte) {
+        if (texte == null) {
+            return "";                                        // pas de métadonnée : texte vide
+        }
+        String t = texte.replaceAll("\\(.*?\\)", " ")         // retire ce qui est entre ( )
+                .replaceAll("\\[.*?\\]", " ");        // retire ce qui est entre [ ]
+        t = t.split("(?i)\\s(feat\\.?|ft\\.?)\\s")[0];        // coupe avant "feat." ou "ft."
+        return t.trim();
     }
 
         // "ezvubfebvebf EFFFEFEBBV !" => "ezvubfebvebf efffefebbv"
