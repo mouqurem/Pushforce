@@ -1,106 +1,102 @@
 package com.example.pushforce;
 
-//import technique
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
-import android.widget.TextView;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
-import java.util.ArrayList;
+import android.util.Log;
+import android.widget.TextView;
 
-//import pour l'affichage bibliothèque hors android
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
 
 public class EcouteActivity extends AppCompatActivity {
-    //Déclaration
-    //Constantes final
-    private static final String TAG = "LOG";
-    private static final int DUREE_MAXIMUM_ECOUTE = 5000; // en ms
 
-    //Attributs (les noms sont parlant c'est comme dans le xml)
-    private TextView textCompteur;
-    private CountDownTimer compteur;
-    private TextView textEcoute;
-    private TextView textReconnaissance;
-    private SpeechRecognizer reconnaissance;
-    //Veleur de TEST ici ----------------------------------------------------
+    // ===== Constantes =====
+    private static final String TAG = "LOG";
+    private static final int DUREE_MAXIMUM_ECOUTE = 5000;   // en ms
+    private static final int DELAI_AVANT_RETOUR = 2000;     // temps pour lire le résultat, en ms
+    public static final String CLE_POINTS = "points";       // nom de la donnée renvoyée à l'écran de Mouquette
+
+    // Valeurs de TEST ---------------------------------------------
     private static final String ARTISTE_TEST = "Stromae";
     private static final String TITRE_TEST = "Alors on danse";
-    //fin valeur de Test ------------------------------------------------------------------
-    private VerificationReponse verification;
+    // fin valeurs de TEST -----------------------------------------
 
-    // Demander une permission au téléphone et à l'utilisateur, et ce qu'on fait avec la réponse
+    // ===== Attributs =====
+    private TextView textCompteur;
+    private TextView textEcoute;
+    private TextView textReconnaissance;
+    private CountDownTimer compteur;
+    private SpeechRecognizer reconnaissance;
+    private Intent intentReconnaissance;
+    private VerificationReponse verification;
+    private boolean tempsEcoule = false;   // si les 5sec sont finies
+    private boolean termine = false;       // si c'est déjà fini
+
+    // Popup de permission micro, et ce qu'on fait de la réponse
     private final ActivityResultLauncher<String> demandePermissionMicro =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), accorde ->{ // demandé à l'utilisateur le micro
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), accorde -> {
                 if (accorde) {
-                    Log.d(TAG, "permission micro accordee"); // message d'info'
-                    demarrerEcoute();
-                }
-                else {
-                    Log.d(TAG, "permission micro echoueyy");
+                    Log.d(TAG, "permission micro accordée");
+                    demarrerReconnaissance();
+                } else {
+                    Log.d(TAG, "permission micro refusée");
                     textEcoute.setText("ECHOUEYYY MICRO REFUSEYYYY");
+                    terminer(0);
                 }
             });
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) { //Première étape quand l'écran est lancé, bien initialisé l'écran
-        super .onCreate(savedInstanceState);
-        EdgeToEdge.enable(this); //Pour prendre tout l'écran, this c'est le téléphone
-        setContentView(R.layout.activity_ecoute); //lien avec mon truc activté.xml
-        //Corriger, prendre des précautions contre le edge to edge on sait jamais
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_ecoute);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars()); // Récuperer les tailles de bars du sytème
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom); //ajouter une marge
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        verification = new VerificationReponse(ARTISTE_TEST, TITRE_TEST); // récupérer la réponse offcielle
+        verification = new VerificationReponse(ARTISTE_TEST, TITRE_TEST);
 
-        // Le lien entre le Java et le XML qui compte avec findviewbyid mm si on l'a déjà mis au dessus
         textCompteur = findViewById(R.id.textCompteur);
         textEcoute = findViewById(R.id.textEcoute);
         textReconnaissance = findViewById(R.id.textReconnaissance);
-        textReconnaissance.setText("");   // on efface le "Validé" du xml
+        textReconnaissance.setText("");
 
-        //lancer le programme
         verifierPermissionMicro();
     }
 
-    //Fonction dont le nom est parlant
     private void verifierPermissionMicro() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                == PackageManager.PERMISSION_GRANTED) {   //ligne bien complexe pour dire est ce que "si la permission est accordée"
-            //cas accordée
-            demarrerEcoute();
-            } else {
-            //cas pas accordée
+                == PackageManager.PERMISSION_GRANTED) {
+            demarrerReconnaissance();
+        } else {
             demandePermissionMicro.launch(Manifest.permission.RECORD_AUDIO);
         }
     }
 
-    //On démarre la reconnaissance avant le compteur on est fair
-    private void demarrerEcoute() {
-        demarrerReconnaissance();
-
-    }
-    //Fonction du compteur
+    // ===== Le compteur =====
     private void demarrerCompteur() {
-        compteur = new CountDownTimer(DUREE_MAXIMUM_ECOUTE, 1000) { //la fameux compteur initialisé
+        compteur = new CountDownTimer(DUREE_MAXIMUM_ECOUTE, 1000) {
             @Override
-            public void onTick(long msRestantes) {  //Compter en secondes sur le tick de l'horloge comme en micro
-                // Conversion ms en secondes,
+            public void onTick(long msRestantes) {
                 long secondes = (msRestantes + 999) / 1000;
                 textCompteur.setText(String.valueOf(secondes));
                 Log.d(TAG, "tick : " + secondes);
@@ -108,34 +104,38 @@ public class EcouteActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
+                tempsEcoule = true;
+                textCompteur.setText("0");              // le CountDownTimer n'affiche jamais 0 tout seul on est obligéééé
+                Log.d(TAG, "compteur fin : aucune réponse");
                 if (reconnaissance != null) {
-                    reconnaissance.stopListening();   // ← ici : fin de l'enregistrement à 5 s
+                    reconnaissance.cancel();            // on coupe le micro
                 }
-                textCompteur.setTextSize(32);
-                textEcoute.setText("ECHOUEYYY");
-                Log.d(TAG, "compteur fin");
+                textEcoute.setText("ECHOUEYYYYYY");
+                terminer(0);                            // point perdu
             }
         };
         compteur.start();
     }
 
+    // ===== La reconnaissance vocale =====
     private void demarrerReconnaissance() {
-        // Vérification préliminaires
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             Log.d(TAG, "reconnaissance indisponible");
             textEcoute.setText("Reconnaissance vocale indisponible");
+            terminer(0);
             return;
         }
 
-        // On prends un micro
-        reconnaissance = SpeechRecognizer.createSpeechRecognizer(this);
+        reconnaissance = SpeechRecognizer.createSpeechRecognizer(this);   // UN SEUL micro créé une fois
         reconnaissance.setRecognitionListener(new RecognitionListener() {
 
             @Override
             public void onReadyForSpeech(Bundle params) {
                 Log.d(TAG, "micro prêt");
-                textEcoute.setText("Parle !");
-                demarrerCompteur();
+                if (compteur == null) {          // seulement à la première écoute
+                    textEcoute.setText("Parle !");
+                    demarrerCompteur();
+                }
             }
 
             @Override
@@ -152,7 +152,7 @@ public class EcouteActivity extends AppCompatActivity {
 
             @Override
             public void onEndOfSpeech() {
-                Log.d(TAG, "fin du micro");
+                Log.d(TAG, "fin de la parole");
                 textEcoute.setText("Analyse...");
             }
 
@@ -162,27 +162,26 @@ public class EcouteActivity extends AppCompatActivity {
                         partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (textes != null && !textes.isEmpty()) {
                     textReconnaissance.setText(textes.get(0));
-                    Log.d(TAG, "partiel : " + textes.get(0));
                 }
             }
 
             @Override
             public void onResults(Bundle results) {
+                if (tempsEcoule) {
+                    return;                              // echoueyyyy : le temps est déjà fini
+                }
+                if (compteur != null) {
+                    compteur.cancel();                   // réponse reçue : on arrête le compteur
+                }
+
                 ArrayList<String> textes =
                         results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 Log.d(TAG, "résultats : " + textes);
                 if (textes != null && !textes.isEmpty()) {
                     textReconnaissance.setText(textes.get(0));
                 }
-                if (compteur != null) {
-                    compteur.cancel();
-                }
-                textEcoute.setText("analyse...");
 
-                //ici on vérifie la réponse (envoi vers verificationReponse)
                 int points = verification.calculerPoints(textes);
-                Log.d(TAG, "points : " + points);
-
                 if (points == 2) {
                     textEcoute.setText("EHHHH Artiste ET titre ! +2");
                 } else if (points == 1) {
@@ -194,17 +193,20 @@ public class EcouteActivity extends AppCompatActivity {
                 } else {
                     textEcoute.setText("AHHH LE PETIOTT !");
                 }
+                terminer(points);
             }
 
             @Override
             public void onError(int erreur) {
                 Log.d(TAG, "erreur reconnaissance : " + erreur);
-                if (compteur != null) {
-                    compteur.cancel();
+                if (tempsEcoule) {
+                    return;                              // le compteur s'est déjà occupé de la fin
                 }
                 if (erreur == SpeechRecognizer.ERROR_NO_MATCH
                         || erreur == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-                    textEcoute.setText("Je n'ai rien compris...");
+                    textEcoute.setText("Alors là j'ai rien capté... répète !");
+                    reconnaissance.cancel();                          // on remet le MÊME micro à zéro
+                    reconnaissance.startListening(intentReconnaissance); // et on relance
                 } else {
                     textEcoute.setText("Erreur micro (" + erreur + ")");
                 }
@@ -214,21 +216,42 @@ public class EcouteActivity extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) { }
         });
 
-        // 4. Les réglages
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR");
-        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+        // Les réglages
+        intentReconnaissance = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR");
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
-        // 5. C'est parti
-        reconnaissance.startListening(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ArrayList<String> motsAttendus = new ArrayList<>();
+            motsAttendus.add(ARTISTE_TEST);
+            motsAttendus.add(TITRE_TEST);
+            intentReconnaissance.putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, motsAttendus);
+        }
+
+        reconnaissance.startListening(intentReconnaissance);
+    }
+
+    // ===== Fin : renvoyer les points et revenir à l'écran de Moukehh =====
+    private void terminer(int points) {
+        if (termine) {
+            return;                       // barriere de protecition
+        }
+        termine = true;
+        Log.d(TAG, "fin de l'écoute, points : " + points);
+
+        Intent resultat = new Intent();
+        resultat.putExtra(CLE_POINTS, points);
+        setResult(RESULT_OK, resultat);   // les points seront récupérés par l'écran de Mouquette
+
+        // On laisse 2 secondes pour lire le message, puis on ferme l'écran
+        new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), DELAI_AVANT_RETOUR);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // arreter le timer si l'écran est fermé avant la fin
         if (compteur != null) {
             compteur.cancel();
         }
