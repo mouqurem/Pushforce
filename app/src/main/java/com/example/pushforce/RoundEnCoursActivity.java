@@ -1,6 +1,9 @@
 package com.example.pushforce;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,30 +11,41 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.CountDownTimer;
+import android.media.MediaPlayer;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class RoundEnCoursActivity extends AppCompatActivity
 {
     private Button transiJ1, transiJ2, transiJ3, transiJ4;
     private CountDownTimer timer;
     private TextView chrono;
-    private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs;
+    private String nomJ1, nomJ2, nomJ3, nomJ4, nombreJoueurs, titre, artiste;
+    private Uri lien_son;
+    private MediaPlayer mediaPlayer = new MediaPlayer();
+    private ArrayList<Uri> playlist;
 
 
     public void setup()
     {
-        Intent intent = getIntent();
-        nomJ1 = intent.getStringExtra("nom_j1");
-        nomJ2 = intent.getStringExtra("nom_j2");
-        nomJ3 = intent.getStringExtra("nom_j3");
-        nomJ4 = intent.getStringExtra("nom_j4");
-        nombreJoueurs = intent.getStringExtra("nb_joueurs");
+        nomJ1 = getIntent().getStringExtra("nom_J1");
+        nomJ2 = getIntent().getStringExtra("nom_J2");
+        nomJ3 = getIntent().getStringExtra("nom_J3");
+        nomJ4 = getIntent().getStringExtra("nom_J4");
+        nombreJoueurs = getIntent().getStringExtra("nb_joueurs");
+        playlist = getIntent().getParcelableArrayListExtra("playlist");
+
+        lien_son = getIntent().getParcelableExtra("lien_son");
 
         transiJ1 = findViewById(R.id.transiJ1);
         transiJ2 = findViewById(R.id.transiJ2);
@@ -79,7 +93,41 @@ public class RoundEnCoursActivity extends AppCompatActivity
         }
     }
 
+public void setup_media()
+{
+//https://developer.android.com/media/platform/mediaplayer/basics?hl=fr
+// Attention : Vous devez intercepter ou transmettre IllegalArgumentException et IOException lorsque vous utilisez setDataSource(),
+// car le fichier auquel vous faites référence peut ne pas exister.
 
+// On met donc des try catch
+
+    mediaPlayer.setAudioAttributes(
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+    );
+    try {
+        mediaPlayer.setDataSource(getApplicationContext(), lien_son);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+    try {
+        mediaPlayer.prepare();
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+    private void lire_metadonnees(Uri uri)
+    {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(getApplicationContext(), uri);
+
+        //Assigner le titre et l'artiste en fonction du lien URI
+        titre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        artiste = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -88,7 +136,13 @@ public class RoundEnCoursActivity extends AppCompatActivity
         setContentView(R.layout.activity_round_en_cours);
 
         setup();
+
         maj_nb_joueurs(nombreJoueurs);
+
+        lire_metadonnees(lien_son);
+
+        setup_media();
+        mediaPlayer.start();
 
 
         timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
@@ -101,9 +155,22 @@ public class RoundEnCoursActivity extends AppCompatActivity
             }
 
             @Override
-            public void onFinish()
+            public void onFinish() //Chrono écoulé
             {
-                chrono.setText("0");
+                mediaPlayer.stop(); //Arrêter la musique
+
+                Intent intent = new Intent(RoundEnCoursActivity.this, AfficherReponseActivity.class);
+                intent.putExtra("titre", titre);
+                intent.putExtra("artiste", artiste);
+                intent.putExtra("nom_J1", nomJ1);
+                intent.putExtra("nom_J2", nomJ2);
+                intent.putExtra("nom_J3", nomJ3);
+                intent.putExtra("nom_J4", nomJ4);
+                intent.putExtra("nb_joueurs", nombreJoueurs);
+                intent.putParcelableArrayListExtra("playlist", playlist);
+
+
+                startActivity(intent);
 
             }
         }.start();

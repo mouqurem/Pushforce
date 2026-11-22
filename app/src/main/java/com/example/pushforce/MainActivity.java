@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import android.net.Uri;
+
+import java.util.ArrayList;
 import java.util.List;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private String Nom_J2;
     private String Nom_J3;
     private String Nom_J4;
-    private List<Uri> playlist;
+    private ArrayList<Uri> playlist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     Bouton_transi.setVisibility(View.VISIBLE);
 
                     if (!uris.isEmpty()) {
-                        playlist = uris;
+                        playlist = new ArrayList<>(uris);
                         String nb_musiques_choisies = "Il y a " + uris.size() + " musiques choisies";
                         Bouton_Layer_1.setText(nb_musiques_choisies);
                         Bouton_Layer_2.setText(nb_musiques_choisies);
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                         Bouton_Layer_4.setText(nb_musiques_choisies);
 
                     }
+
                 });
 
         Bouton_nb_joueur.setOnClickListener(new View.OnClickListener() {
@@ -149,11 +152,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, DebutRoundActivity.class);
-                intent.putExtra("nombre_joueurs", Nombre_joueurs);
+                intent.putExtra("nb_joueurs", Nombre_joueurs);
                 intent.putExtra("nom_J1", Nom_J1);
                 intent.putExtra("nom_J2", Nom_J2);
                 intent.putExtra("nom_J3", Nom_J3);
                 intent.putExtra("nom_J4", Nom_J4);
+                intent.putParcelableArrayListExtra("playlist", playlist);
 
                 startActivity(intent);
             }
