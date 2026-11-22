@@ -91,19 +91,21 @@ public class EcouteActivity extends AppCompatActivity {
         sonDefaiteSurMauvaiseRep = sons.load(this, R.raw.ahhpetio, 1);
         sonDefaiteSurCompteur  = sons.load(this, R.raw.echoueyy, 1);
 
-        // Récupérer la chanson envoyée par l'écran de Mouquette
+        // Récupérer la chanson envoyée par RoundEnCoursActivity (mouqette)
         Intent recu = getIntent();
-        artiste      = recu.getStringExtra(CLE_ARTISTE);
-        titre        = recu.getStringExtra(CLE_TITRE);
-        langue       = recu.getStringExtra(CLE_LANGUE);
+        if (recu.hasExtra(CLE_ARTISTE)) {
+            artiste = recu.getStringExtra(CLE_ARTISTE);   // peut être null si le mp3 n a pas de métadonnées
+            titre   = recu.getStringExtra(CLE_TITRE);
+        } else {
+            artiste = ARTISTE_TEST;                       // écran lancé seul : mode test
+            titre   = TITRE_TEST;
+        }
+        langue = recu.getStringExtra(CLE_LANGUE);
+        if (langue == null) {
+            langue = "fr-FR";
+        }
         numeroJoueur = recu.getIntExtra(CLE_JOUEUR, 1);
-
-        // Si rien n'est reçu (écran lancé seul pour tester), on garde les valeurs de test
-        if (artiste == null) artiste = ARTISTE_TEST;
-        if (titre == null)   titre = TITRE_TEST;
-        if (langue == null)  langue = "fr-FR";
-
-        Log.d(TAG, "chanson reçue : " + artiste + " - " + titre + " (" + langue + "), joueur " + numeroJoueur);
+        Log.d(TAG, "chanson reçue : " + artiste + " - " + titre + ", joueur " + numeroJoueur);
 
         verification = new VerificationReponse(artiste, titre);
 
