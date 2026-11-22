@@ -13,6 +13,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.TextView;
+import android.media.SoundPool;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -30,7 +31,7 @@ public class EcouteActivity extends AppCompatActivity {
     // ===== Constantes =====
     private static final String TAG = "LOG";
     private static final int DUREE_MAXIMUM_ECOUTE = 5000;   // en ms
-    private static final int DELAI_AVANT_RETOUR = 2000;     // temps pour lire le résultat, en ms
+    private static final int DELAI_AVANT_RETOUR = 7000;     // temps pour lire le résultat, en ms
     public static final String CLE_POINTS = "points";       // nom de la donnée renvoyée à l'écran de Mouquette
 
     // Valeurs de TEST ---------------------------------------------
@@ -48,7 +49,9 @@ public class EcouteActivity extends AppCompatActivity {
     private VerificationReponse verification;
     private boolean tempsEcoule = false;   // si les 5sec sont finies
     private boolean termine = false;       // si c'est déjà fini
-
+    private SoundPool sons;
+    private int sonDefaiteSurMauvaiseRep;
+    private int sonDefaiteSurCompteur;
     // Popup de permission micro, et ce qu'on fait de la réponse
     private final ActivityResultLauncher<String> demandePermissionMicro =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), accorde -> {
@@ -73,6 +76,11 @@ public class EcouteActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Préparer les effets sonores (chargés à l'avance pour être joués sans délai)
+        sons = new SoundPool.Builder().setMaxStreams(3).build();
+        sonDefaiteSurMauvaiseRep = sons.load(this, R.raw.ahhpetio, 1);
+        sonDefaiteSurCompteur  = sons.load(this, R.raw.echoueyy, 1);
+
         verification = new VerificationReponse(ARTISTE_TEST, TITRE_TEST);
 
         textCompteur = findViewById(R.id.textCompteur);
@@ -91,7 +99,10 @@ public class EcouteActivity extends AppCompatActivity {
             demandePermissionMicro.launch(Manifest.permission.RECORD_AUDIO);
         }
     }
-
+    // ===== Jouer des sons =====
+    private void jouerSon(int son) {
+        sons.play(son, 1f, 1f, 1, 0, 1f);
+    }
     // ===== Le compteur =====
     private void demarrerCompteur() {
         compteur = new CountDownTimer(DUREE_MAXIMUM_ECOUTE, 1000) {
@@ -111,6 +122,7 @@ public class EcouteActivity extends AppCompatActivity {
                     reconnaissance.cancel();            // on coupe le micro
                 }
                 textEcoute.setText("ECHOUEYYYYYY");
+                jouerSon(sonDefaiteSurCompteur);
                 terminer(0);                            // point perdu
             }
         };
@@ -191,7 +203,8 @@ public class EcouteActivity extends AppCompatActivity {
                         textEcoute.setText("Titre trouvé ! +1");
                     }
                 } else {
-                    textEcoute.setText("AHHH LE PETIOTT !");
+                    textEcoute.setText("FAUX !\nAHHH LE PETIOTT\nAHHH C'EST ZEROO 0 !");
+                    jouerSon(sonDefaiteSurMauvaiseRep);
                 }
                 terminer(points);
             }
@@ -257,6 +270,9 @@ public class EcouteActivity extends AppCompatActivity {
         }
         if (reconnaissance != null) {
             reconnaissance.destroy();
+        }
+        if (sons != null) {
+            sons.release();
         }
     }
 }
