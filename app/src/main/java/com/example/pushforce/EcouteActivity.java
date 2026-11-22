@@ -264,8 +264,8 @@ public class EcouteActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ArrayList<String> motsAttendus = new ArrayList<>();
-            motsAttendus.add(artiste);
-            motsAttendus.add(titre);
+            if (artiste != null) motsAttendus.add(artiste);
+            if (titre != null)   motsAttendus.add(titre);
             intentReconnaissance.putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, motsAttendus);
         }
 
@@ -285,7 +285,8 @@ public class EcouteActivity extends AppCompatActivity {
         resultat.putExtra(CLE_JOUEUR, numeroJoueur);
         setResult(RESULT_OK, resultat);   // les points seront récupérés par l'écran de Mouquette
 
-        // On laisse 2 secondes pour lire le message, puis on ferme l'écran
+        // je change à chaque fois le temps donc je vais dire on laisse 6 ou 7  secondes pour lire le message
+        // puis on ferme l'écran (AHHHH SIX SEVEEEEN)
         new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), DELAI_AVANT_RETOUR);
     }
 
