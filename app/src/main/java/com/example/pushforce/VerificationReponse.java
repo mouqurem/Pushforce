@@ -55,17 +55,20 @@ public class VerificationReponse {
     // Vérifer si tout ce qui est attendu est là ( à peu près )
     private boolean estDansPhrase(String attendu, String phrase) {
         if (normaliser(attendu).isEmpty()) {
-            return false;          // rien à chercher : impossible de trouver
+            return false;
         }
         String[] motsAttendus = normaliser(attendu).split(" ");
         String[] motsDits = normaliser(phrase).split(" ");
 
+        int trouves = 0;
         for (String motAttendu : motsAttendus) {
-            if (!motPresent(motAttendu, motsDits)) {
-                return false;      // un seul mot manque => pas trouvé
+            if (motPresent(motAttendu, motsDits)) {
+                trouves++;
             }
         }
-        return true;
+        // 1 ou 2 mots : tous obligatoires. 3 mots ou plus : on accepte d'en rater un.
+        int necessaires = (motsAttendus.length <= 2) ? motsAttendus.length : motsAttendus.length - 1;
+        return trouves >= necessaires;
     }
 
     // Permet d'être plus tolérant parce le micro google ne détecte pas mauvais djo, il détecte mauvais joe c'est tout
@@ -94,6 +97,8 @@ public class VerificationReponse {
         String t = texte.replaceAll("\\(.*?\\)", " ")         // retire ce qui est entre ( )
                 .replaceAll("\\[.*?\\]", " ");        // retire ce qui est entre [ ]
         t = t.split("(?i)\\s(feat\\.?|ft\\.?)\\s")[0];        // coupe avant "feat." ou "ft."
+        t = t.split(" - ")[0];        // "Alors on danse - Radio Edit" → "Alors on danse"
+        t = t.split("[,;&/]")[0];     // "Stromae, Angèle" ou "Stromae & X" → "Stromae"
         return t.trim();
     }
 

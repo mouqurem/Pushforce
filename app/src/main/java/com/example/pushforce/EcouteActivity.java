@@ -62,6 +62,9 @@ public class EcouteActivity extends AppCompatActivity {
     private SoundPool sons;
     private int sonDefaiteSurMauvaiseRep;
     private int sonDefaiteSurCompteur;
+
+    private final ArrayList<String> toutesLesReponses = new ArrayList<>();   // tout ce qui a été dit
+
     // Popup de permission micro, et ce qu'on fait de la réponse
     private final ActivityResultLauncher<String> demandePermissionMicro =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), accorde -> {
@@ -125,11 +128,28 @@ public class EcouteActivity extends AppCompatActivity {
             demandePermissionMicro.launch(Manifest.permission.RECORD_AUDIO);
         }
     }
-    // ===== Jouer des sons =====
+    private void afficherResultat(int points) {
+        Log.d(TAG, "tout ce qui a été dit : " + toutesLesReponses);
+        if (points == 2) {
+            textEcoute.setText("EHHHH Artiste ET titre ! +2");
+        } else if (points == 1) {
+            if (verification.artisteTrouve(toutesLesReponses)) {
+                textEcoute.setText("Artiste trouvé ! +1");
+            } else {
+                textEcoute.setText("Titre trouvé ! +1");
+            }
+        } else if (toutesLesReponses.isEmpty()) {
+            textEcoute.setText("ECHOUEYYYYYY");                 // rien dit du tout
+            jouerSon(sonDefaiteSurCompteur);
+        } else {
+            textEcoute.setText("FAUX !\nAHHH LE PETIOTT\nAHHH C'EST ZEROO 0 !");
+            jouerSon(sonDefaiteSurMauvaiseRep);
+        }
+        terminer(points);
+    }
     private void jouerSon(int son) {
         sons.play(son, 1f, 1f, 1, 0, 1f);
     }
-    // ===== Le compteur =====
     private void demarrerCompteur() {
         compteur = new CountDownTimer(DUREE_MAXIMUM_ECOUTE, 1000) {
             @Override
@@ -142,14 +162,12 @@ public class EcouteActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tempsEcoule = true;
-                textCompteur.setText("0");              // le CountDownTimer n'affiche jamais 0 tout seul on est obligéééé
-                Log.d(TAG, "compteur fin : aucune réponse");
+                textCompteur.setText("0");
                 if (reconnaissance != null) {
-                    reconnaissance.cancel();            // on coupe le micro
+                    reconnaissance.cancel();
                 }
-                textEcoute.setText("ECHOUEYYYYYY");
-                jouerSon(sonDefaiteSurCompteur);
-                terminer(0);                            // point perdu
+                int points = verification.calculerPoints(toutesLesReponses);   // on juge TOUT ce qui a été dit
+                afficherResultat(points);
             }
         };
         compteur.start();
@@ -206,33 +224,25 @@ public class EcouteActivity extends AppCompatActivity {
             @Override
             public void onResults(Bundle results) {
                 if (tempsEcoule) {
-                    return;                              // echoueyyyy : le temps est déjà fini
+                    return;
                 }
-                if (compteur != null) {
-                    compteur.cancel();                   // réponse reçue : on arrête le compteur
-                }
-
                 ArrayList<String> textes =
                         results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 Log.d(TAG, "résultats : " + textes);
                 if (textes != null && !textes.isEmpty()) {
+                    toutesLesReponses.addAll(textes);           // on garde tout ce qui a été dit
                     textReconnaissance.setText(textes.get(0));
                 }
 
-                int points = verification.calculerPoints(textes);
+                int points = verification.calculerPoints(toutesLesReponses);
                 if (points == 2) {
-                    textEcoute.setText("EHHHH Artiste ET titre ! +2");
-                } else if (points == 1) {
-                    if (verification.artisteTrouve(textes)) {
-                        textEcoute.setText("Artiste trouvé ! +1");
-                    } else {
-                        textEcoute.setText("Titre trouvé ! +1");
-                    }
+                    if (compteur != null) compteur.cancel();   // tout trouvé : on s'arrête tout de suite
+                    afficherResultat(points);
                 } else {
-                    textEcoute.setText("FAUX !\nAHHH LE PETIOTT\nAHHH C'EST ZEROO 0 !");
-                    jouerSon(sonDefaiteSurMauvaiseRep);
+                    textEcoute.setText("Je t'écoute encore...");      // pas encore tout : on continue
+                    reconnaissance.cancel();
+                    reconnaissance.startListening(intentReconnaissance);
                 }
-                terminer(points);
             }
 
             @Override
@@ -257,7 +267,7 @@ public class EcouteActivity extends AppCompatActivity {
 
         // Les réglages
         intentReconnaissance = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE, langue);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
@@ -268,7 +278,15 @@ public class EcouteActivity extends AppCompatActivity {
             if (titre != null)   motsAttendus.add(titre);
             intentReconnaissance.putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, motsAttendus);
         }
-
+        // Android 14+ (mon tel) : passer automatiquement du français à l'anglais selon ce qui est dit
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ArrayList<String> langues = new ArrayList<>();
+            langues.add("fr-FR");
+            langues.add("en-US");
+            intentReconnaissance.putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH,
+                    RecognizerIntent.LANGUAGE_SWITCH_BALANCED);
+            intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES, langues);
+        }
         reconnaissance.startListening(intentReconnaissance);
     }
 
