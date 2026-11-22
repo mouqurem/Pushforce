@@ -35,6 +35,28 @@ public class RoundEnCoursActivity extends AppCompatActivity
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private ArrayList<Uri> playlist;
 
+    private long tempsRestant = 30000; // temps restant du round, pour reprendre après une mauvaise réponse
+    private boolean buzzEnCours = false; // empêche deux joueurs de buzzer en même temps (bug sinon)
+
+    private final ActivityResultLauncher<Intent> lanceurEcoute =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), resultat -> {
+                int points = 0;
+                int joueur = 0;
+                if (resultat.getResultCode() == RESULT_OK && resultat.getData() != null) {
+                    points = resultat.getData().getIntExtra(EcouteActivity.CLE_POINTS, 0);
+                    joueur = resultat.getData().getIntExtra(EcouteActivity.CLE_JOUEUR, 0);
+                }
+                buzzEnCours = false;
+
+                if (points > 0) {
+                    Scores.ajouter(joueur, points);   // bonne réponse : on note les points
+                    allerAfficherReponse();           // et on affiche la réponse
+                } else {
+                    mediaPlayer.start();              // mauvaise réponse : la musique reprend
+                    lancerTimer(tempsRestant);        // et le chrono repart là où il était
+                }
+            });
+
 
     public void setup()
     {
@@ -58,6 +80,11 @@ public class RoundEnCoursActivity extends AppCompatActivity
         transiJ4.setText(nomJ4);
 
         chrono = findViewById(R.id.chrono);
+
+        transiJ1.setOnClickListener(v -> buzz(1));
+        transiJ2.setOnClickListener(v -> buzz(2));
+        transiJ3.setOnClickListener(v -> buzz(3));
+        transiJ4.setOnClickListener(v -> buzz(4));
     }
     public void maj_nb_joueurs(String nb_joueurs)
     {
@@ -144,36 +171,72 @@ public void setup_media()
         setup_media();
         mediaPlayer.start();
 
+        lancerTimer(30000);
 
-        timer = new CountDownTimer(30000, 100) // durée totale, intervalle de mise à jour
+    }
+    private void lancerTimer(long duree)
+    {
+        timer = new CountDownTimer(duree, 100) // durée totale, intervalle de mise à jour
         {
             @Override
             public void onTick(long msRestantes)
             {
-
+                tempsRestant = msRestantes; // memoriser les secondes qui reste
                 chrono.setText(String.valueOf(msRestantes/1000));
             }
 
             @Override
             public void onFinish() //Chrono écoulé
             {
-                mediaPlayer.stop(); //Arrêter la musique
-
-                Intent intent = new Intent(RoundEnCoursActivity.this, AfficherReponseActivity.class);
-                intent.putExtra("titre", titre);
-                intent.putExtra("artiste", artiste);
-                intent.putExtra("nom_J1", nomJ1);
-                intent.putExtra("nom_J2", nomJ2);
-                intent.putExtra("nom_J3", nomJ3);
-                intent.putExtra("nom_J4", nomJ4);
-                intent.putExtra("nb_joueurs", nombreJoueurs);
-                intent.putParcelableArrayListExtra("playlist", playlist);
-
-
-                startActivity(intent);
-
+                allerAfficherReponse();
             }
         }.start();
+    }
+    //Un joueur appuie sur  un bouton
+    private void buzz(int joueur)
+    {
+        if (buzzEnCours) {
+            return;                       // quelqu'un a déjà buzzé
+        }
+        buzzEnCours = true;
 
+        timer.cancel();                   // arrête le chrono
+        mediaPlayer.pause();              // met la musique en pause (au cas ou le micro l'entend)
+
+        Intent intent = new Intent(this, EcouteActivity.class);
+        intent.putExtra(EcouteActivity.CLE_ARTISTE, artiste);
+        intent.putExtra(EcouteActivity.CLE_TITRE, titre);
+        intent.putExtra(EcouteActivity.CLE_JOUEUR, joueur);
+        lanceurEcoute.launch(intent);
+    }
+
+    //Mettre les intent dans un fonction parce qu'on rétuilise 2 fois ce code sinon c'etait plus simple
+    private void allerAfficherReponse()
+    {
+        mediaPlayer.stop(); //Arrêter la musique
+
+        Intent intent = new Intent(RoundEnCoursActivity.this, AfficherReponseActivity.class);
+        intent.putExtra("titre", titre);
+        intent.putExtra("artiste", artiste);
+        intent.putExtra("nom_J1", nomJ1);
+        intent.putExtra("nom_J2", nomJ2);
+        intent.putExtra("nom_J3", nomJ3);
+        intent.putExtra("nom_J4", nomJ4);
+        intent.putExtra("nb_joueurs", nombreJoueurs);
+        intent.putParcelableArrayListExtra("playlist", playlist);
+
+        startActivity(intent);
+        finish(); // permet de pas empiler les round dans la mémoires
+    }
+
+    // Arreter la musique sah enfin ça s'arretais pas c'était infernal
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        if (timer != null) {
+            timer.cancel();
+        }
+        mediaPlayer.release();
     }
 }
