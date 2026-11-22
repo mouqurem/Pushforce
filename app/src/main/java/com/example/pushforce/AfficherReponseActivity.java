@@ -72,6 +72,7 @@ public class AfficherReponseActivity extends AppCompatActivity
                 intent.putExtra("nb_joueurs", nombreJoueurs);
 
                 startActivity(intent);
+                finish();
             }
         };
 

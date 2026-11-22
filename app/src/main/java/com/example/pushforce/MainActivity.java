@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("nom_J4", Nom_J4);
                 intent.putParcelableArrayListExtra("playlist", playlist);
 
+                Scores.reinitialiser();   // nouvelle partie : tous les scores repartent de 0
                 startActivity(intent);
             }
         });

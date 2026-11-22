@@ -37,11 +37,11 @@ public class DebutRoundActivity extends AppCompatActivity
 
     public void setup()
     {
-        //à remplacer par intent
-        scoreJ1 = 0;
-        scoreJ2 = 0;
-        scoreJ3 = 0;
-        scoreJ4 = 0;
+        // Les scores sont gardés dans la classe Scores pendant toute la partie
+        scoreJ1 = Scores.get(1);
+        scoreJ2 = Scores.get(2);
+        scoreJ3 = Scores.get(3);
+        scoreJ4 = Scores.get(4);
 
         //Récupérer le nombre de joueurs par intent
         nombreJoueurs = getIntent().getStringExtra("nb_joueurs");
@@ -149,6 +149,7 @@ public class DebutRoundActivity extends AppCompatActivity
                 intent.putExtra("lien_son", lien_son);
 
                 startActivity(intent);
+                finish();
             }
         });
 
