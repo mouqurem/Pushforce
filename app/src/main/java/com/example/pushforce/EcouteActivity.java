@@ -31,8 +31,14 @@ public class EcouteActivity extends AppCompatActivity {
     // ===== Constantes =====
     private static final String TAG = "LOG";
     private static final int DUREE_MAXIMUM_ECOUTE = 5000;   // en ms
-    private static final int DELAI_AVANT_RETOUR = 7000;     // temps pour lire le résultat, en ms
-    public static final String CLE_POINTS = "points";       // nom de la donnée renvoyée à l'écran de Mouquette
+    private static final int DELAI_AVANT_RETOUR = 6000;     // temps pour lire le résultat, en ms
+
+    //lien avec moukehhh
+    public static final String CLE_POINTS  = "points";
+    public static final String CLE_ARTISTE = "artiste";
+    public static final String CLE_TITRE   = "titre";
+    public static final String CLE_LANGUE  = "langue";
+    public static final String CLE_JOUEUR  = "joueur";
 
     // Valeurs de TEST ---------------------------------------------
     private static final String ARTISTE_TEST = "Stromae";
@@ -40,6 +46,10 @@ public class EcouteActivity extends AppCompatActivity {
     // fin valeurs de TEST -----------------------------------------
 
     // ===== Attributs =====
+    private String artiste;   //la réponse
+    private String titre; //la réponse
+    private String langue; //la langue de la musique pour aider google
+    private int numeroJoueur; //le joueur
     private TextView textCompteur;
     private TextView textEcoute;
     private TextView textReconnaissance;
@@ -81,7 +91,21 @@ public class EcouteActivity extends AppCompatActivity {
         sonDefaiteSurMauvaiseRep = sons.load(this, R.raw.ahhpetio, 1);
         sonDefaiteSurCompteur  = sons.load(this, R.raw.echoueyy, 1);
 
-        verification = new VerificationReponse(ARTISTE_TEST, TITRE_TEST);
+        // Récupérer la chanson envoyée par l'écran de Mouquette
+        Intent recu = getIntent();
+        artiste      = recu.getStringExtra(CLE_ARTISTE);
+        titre        = recu.getStringExtra(CLE_TITRE);
+        langue       = recu.getStringExtra(CLE_LANGUE);
+        numeroJoueur = recu.getIntExtra(CLE_JOUEUR, 1);
+
+        // Si rien n'est reçu (écran lancé seul pour tester), on garde les valeurs de test
+        if (artiste == null) artiste = ARTISTE_TEST;
+        if (titre == null)   titre = TITRE_TEST;
+        if (langue == null)  langue = "fr-FR";
+
+        Log.d(TAG, "chanson reçue : " + artiste + " - " + titre + " (" + langue + "), joueur " + numeroJoueur);
+
+        verification = new VerificationReponse(artiste, titre);
 
         textCompteur = findViewById(R.id.textCompteur);
         textEcoute = findViewById(R.id.textEcoute);
@@ -232,14 +256,14 @@ public class EcouteActivity extends AppCompatActivity {
         // Les réglages
         intentReconnaissance = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR");
+        intentReconnaissance.putExtra(RecognizerIntent.EXTRA_LANGUAGE, langue);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         intentReconnaissance.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ArrayList<String> motsAttendus = new ArrayList<>();
-            motsAttendus.add(ARTISTE_TEST);
-            motsAttendus.add(TITRE_TEST);
+            motsAttendus.add(artiste);
+            motsAttendus.add(titre);
             intentReconnaissance.putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, motsAttendus);
         }
 
@@ -256,6 +280,7 @@ public class EcouteActivity extends AppCompatActivity {
 
         Intent resultat = new Intent();
         resultat.putExtra(CLE_POINTS, points);
+        resultat.putExtra(CLE_JOUEUR, numeroJoueur);
         setResult(RESULT_OK, resultat);   // les points seront récupérés par l'écran de Mouquette
 
         // On laisse 2 secondes pour lire le message, puis on ferme l'écran
